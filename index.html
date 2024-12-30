@@ -100,6 +100,7 @@
             <label for="employee">Employee Name:</label>
             <input type="text" id="employee" name="employee" required>
 
+            <!-- New "Solution" field -->
             <label for="solution">Solution:</label>
             <textarea id="solution" name="solution" rows="4" placeholder="Enter the solution to the failure" required></textarea>
 
@@ -138,8 +139,6 @@
                 solution: document.getElementById('solution').value,
             };
 
-            console.log('Form Data:', formData); // Log form data for debugging
-
             // Send the data to Google Apps Script
             fetch('https://script.google.com/macros/s/AKfycbwgOvb-5aiPHc1roJvugkpVTilpJwZRKnGoAyqiOFDRKKW-LQC5ebRg567N2Cdmg92OSQ/exec', {
                 method: 'POST',
@@ -150,11 +149,11 @@
             })
             .then(response => response.text())
             .then(data => {
-                console.log('Response from Google Apps Script:', data); // Log response
+                console.log('Success:', data);
                 alert('Log submitted successfully!');
             })
             .catch(error => {
-                console.error('Error:', error); // Log any errors
+                console.error('Error:', error);
                 alert('There was an error submitting the log.');
             });
         });
