@@ -90,7 +90,7 @@
 
     <div class="container">
         <h2>Submit a Failure Log</h2>
-        <form action="" method="POST">
+        <form id="failureLogForm">
             <label for="failureDescription">Failure Description:</label>
             <textarea id="failureDescription" name="failureDescription" rows="4" required></textarea>
 
@@ -125,6 +125,39 @@
 
         setInterval(updateDateTime, 1000);
         updateDateTime();  // Run immediately to display time on load
+
+        // Form submission
+        const form = document.getElementById('failureLogForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            // Gather form data
+            const formData = {
+                failureDescription: document.getElementById('failureDescription').value,
+                machine: document.getElementById('machine').value,
+                employee: document.getElementById('employee').value,
+                solution: document.getElementById('solution').value,
+            };
+
+            // Send the data to Google Apps Script
+            fetch('https://script.google.com/a/macros/velocitysimlounge.com/s/AKfycbw5v44SLgeeoyG-XBc_JubcOkS-DHW76HatsxZbrz4gL_ML-tFvL2CNvTqNJDlZD-BB8Q/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Log submitted successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error submitting the log.');
+            });
+        });
     </script>
 </body>
 </html>
+
