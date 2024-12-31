@@ -90,7 +90,9 @@
 
     <div class="container">
         <h2>Submit a Failure Log</h2>
-        <form id="failureLogForm">
+        <button id="authButton">Sign in with Google</button>
+
+        <form id="failureLogForm" style="display:none;">
             <label for="failureDescription">Failure Description:</label>
             <textarea id="failureDescription" name="failureDescription" rows="4" required></textarea>
 
@@ -100,7 +102,6 @@
             <label for="employee">Employee Name:</label>
             <input type="text" id="employee" name="employee" required>
 
-            <!-- New "Solution" field -->
             <label for="solution">Solution:</label>
             <textarea id="solution" name="solution" rows="4" placeholder="Enter the solution to the failure" required></textarea>
 
@@ -117,6 +118,8 @@
     </div>
 
     <script>
+        let userAuthenticated = false;
+
         // Display current date and time
         function updateDateTime() {
             const currentDateTime = new Date().toLocaleString();
@@ -126,10 +129,40 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();  // Run immediately to display time on load
 
+        // Google OAuth integration
+        function onSignIn(googleUser) {
+            const profile = googleUser.getBasicProfile();
+            console.log('Signed in as: ' + profile.getName());
+            userAuthenticated = true;
+            document.getElementById('authButton').style.display = 'none';
+            document.getElementById('failureLogForm').style.display = 'block';
+        }
+
+        function onSignOut() {
+            const auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                console.log('User signed out.');
+                userAuthenticated = false;
+                document.getElementById('authButton').style.display = 'block';
+                document.getElementById('failureLogForm').style.display = 'none';
+            });
+        }
+
+        function handleClientLoad() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init();
+            });
+        }
+
         // Form submission
         const form = document.getElementById('failureLogForm');
         form.addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent the default form submission
+
+            if (!userAuthenticated) {
+                alert('Please sign in first!');
+                return;
+            }
 
             // Gather form data
             const formData = {
@@ -157,6 +190,15 @@
                 alert('There was an error submitting the log.');
             });
         });
+
+        // Load the Google API client
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "https://apis.google.com/js/platform.js?onload=handleClientLoad";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'google-jssdk'));
     </script>
 </body>
 </html>
