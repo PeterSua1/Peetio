@@ -64,13 +64,58 @@
         .btn-submit:hover {
             background-color: #e04b4b;
         }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+
+        .date-time {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px;
+        }
     </style>
-    
-    <!-- Allow scripts from googleapis.com -->
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com;">
-    
-    <!-- Adding Google Sign-In JS -->
-    <script src="https://apis.google.com/js/platform.js?onload=handleClientLoad" async defer></script>
+</head>
+<body>
+    <header>
+        <img src="https://assets.onecompiler.app/434hq657m/434hq8r7a/Screenshot%202024-12-29%20184316.png" alt="Velocity Logo">
+    </header>
+
+    <div class="container">
+        <h2>Submit a Failure Log</h2>
+        <button id="authButton">Sign in with Google</button>
+
+        <form id="failureLogForm" style="display:none;">
+            <label for="failureDescription">Failure Description:</label>
+            <textarea id="failureDescription" name="failureDescription" rows="4" required></textarea>
+
+            <label for="machine">Machine Name:</label>
+            <input type="text" id="machine" name="machine" required>
+
+            <label for="employee">Employee Name:</label>
+            <input type="text" id="employee" name="employee" required>
+
+            <label for="solution">Solution:</label>
+            <textarea id="solution" name="solution" rows="4" placeholder="Enter the solution to the failure" required></textarea>
+
+            <button type="submit" class="btn-submit">Submit Log</button>
+        </form>
+
+        <div class="date-time">
+            <p>Current Date and Time: <span id="currentDateTime"></span></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Velocity | Sim Racing Lounge. All rights reserved.</p>
+    </div>
 
     <script>
         let userAuthenticated = false;
@@ -150,39 +195,15 @@
                 alert('There was an error submitting the log.');
             });
         });
+
+        // Load the Google API client
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "https://apis.google.com/js/platform.js?onload=handleClientLoad";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'google-jssdk'));
     </script>
-</head>
-<body>
-    <header>
-        <img src="https://assets.velocitysimracing.com/logo.png" alt="Velocity Sim Racing Lounge Logo">
-        <h1>Welcome to Velocity Sim Racing Lounge</h1>
-    </header>
-
-    <div class="container">
-        <button id="authButton" class="btn-submit">Sign in with Google</button>
-        
-        <!-- Failure Log Form (Hidden until signed in) -->
-        <div id="failureLogForm" style="display:none;">
-            <h2>Log Failure Report</h2>
-            <form id="failureLogForm">
-                <label for="failureDescription">Failure Description:</label>
-                <textarea id="failureDescription" name="failureDescription" required></textarea>
-
-                <label for="machine">Machine:</label>
-                <input type="text" id="machine" name="machine" required>
-
-                <label for="employee">Employee Name:</label>
-                <input type="text" id="employee" name="employee" required>
-
-                <label for="solution">Solution:</label>
-                <textarea id="solution" name="solution" required></textarea>
-
-                <button type="submit" class="btn-submit">Submit Log</button>
-            </form>
-        </div>
-        
-        <!-- Current Date and Time -->
-        <div id="currentDateTime"></div>
-    </div>
 </body>
 </html>
