@@ -133,7 +133,7 @@
         function handleClientLoad() {
             gapi.load('auth2', function() {
                 gapi.auth2.init({
-                    client_id: 'YOUR_GOOGLE_CLIENT_ID'
+                    client_id: '470392691930-pnc6fop5etff3ko68adqh2cg5vmi7647.apps.googleusercontent.com'
                 }).then(function() {
                     const auth2 = gapi.auth2.getAuthInstance();
                     auth2.isSignedIn.listen(updateSigninStatus);
