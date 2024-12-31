@@ -129,29 +129,34 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();  // Run immediately to display time on load
 
-        // Google OAuth integration
-        function onSignIn(googleUser) {
-            const profile = googleUser.getBasicProfile();
-            console.log('Signed in as: ' + profile.getName());
-            userAuthenticated = true;
-            document.getElementById('authButton').style.display = 'none';
-            document.getElementById('failureLogForm').style.display = 'block';
+        // Google OAuth initialization and client load
+        function handleClientLoad() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({
+                    client_id: 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com'
+                }).then(function() {
+                    const auth2 = gapi.auth2.getAuthInstance();
+                    auth2.isSignedIn.listen(updateSigninStatus);
+                    document.getElementById('authButton').addEventListener('click', function() {
+                        auth2.signIn();
+                    });
+                });
+            });
         }
 
-        function onSignOut() {
-            const auth2 = gapi.auth2.getAuthInstance();
-            auth2.signOut().then(function () {
-                console.log('User signed out.');
+        // Update user status after sign-in
+        function updateSigninStatus(isSignedIn) {
+            if (isSignedIn) {
+                const profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+                console.log('Signed in as: ' + profile.getName());
+                userAuthenticated = true;
+                document.getElementById('authButton').style.display = 'none';
+                document.getElementById('failureLogForm').style.display = 'block';
+            } else {
                 userAuthenticated = false;
                 document.getElementById('authButton').style.display = 'block';
                 document.getElementById('failureLogForm').style.display = 'none';
-            });
-        }
-
-        function handleClientLoad() {
-            gapi.load('auth2', function() {
-                gapi.auth2.init();
-            });
+            }
         }
 
         // Form submission
