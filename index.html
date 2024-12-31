@@ -138,8 +138,14 @@
                     const auth2 = gapi.auth2.getAuthInstance();
                     auth2.isSignedIn.listen(updateSigninStatus);
                     document.getElementById('authButton').addEventListener('click', function() {
-                        auth2.signIn();
+                        auth2.signIn().catch(function(error) {
+                            console.error('Sign-in failed: ', error);
+                            alert('Sign-in failed! Please try again.');
+                        });
                     });
+                }).catch(function(error) {
+                    console.error('OAuth initialization failed: ', error);
+                    alert('OAuth initialization failed! Please try again.');
                 });
             });
         }
@@ -192,7 +198,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('There was an error submitting the log.');
+                alert('There was an error submitting the log. Please try again.');
             });
         });
 
