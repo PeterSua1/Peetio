@@ -82,6 +82,41 @@
             margin-top: 10px;
         }
     </style>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJHwwzpwDKZvf4wG8FS7bKg7WuG2eg6wY",
+            authDomain: "velocity-failure-log-eb1f9.firebaseapp.com",
+            projectId: "velocity-failure-log-eb1f9",
+            storageBucket: "velocity-failure-log-eb1f9.firebasestorage.app",
+            messagingSenderId: "885918623112",
+            appId: "1:885918623112:web:f88d80bef49d6a2b98c63d",
+            measurementId: "G-BY9X686BQR"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        // Function to sign in with Google
+        function signIn() {
+            signInWithPopup(auth, provider)
+                .then((result) => {
+                    const user = result.user;
+                    console.log('Signed in as:', user.displayName);
+                    document.getElementById('authButton').style.display = 'none';
+                    document.getElementById('failureLogForm').style.display = 'block';
+                })
+                .catch((error) => {
+                    console.error('Sign-in failed:', error);
+                    alert('Sign-in failed! Please try again.');
+                });
+        }
+    </script>
 </head>
 <body>
     <header>
@@ -90,7 +125,7 @@
 
     <div class="container">
         <h2>Submit a Failure Log</h2>
-        <button id="authButton">Sign in with Google</button>
+        <button id="authButton" onclick="signIn()">Sign in with Google</button>
 
         <form id="failureLogForm" style="display:none;">
             <label for="failureDescription">Failure Description:</label>
@@ -118,8 +153,6 @@
     </div>
 
     <script>
-        let userAuthenticated = false;
-
         // Display current date and time
         function updateDateTime() {
             const currentDateTime = new Date().toLocaleString();
@@ -129,54 +162,11 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();  // Run immediately to display time on load
 
-        // Google OAuth initialization and client load
-        function handleClientLoad() {
-            gapi.load('auth2', function() {
-                gapi.auth2.init({
-                    client_id: '470392691930-pnc6fop5etff3ko68adqh2cg5vmi7647.apps.googleusercontent.com' // Replace with your actual client ID
-                }).then(function() {
-                    const auth2 = gapi.auth2.getAuthInstance();
-                    auth2.isSignedIn.listen(updateSigninStatus);
-                    document.getElementById('authButton').addEventListener('click', function() {
-                        auth2.signIn();
-                        auth2.signIn().catch(function(error) {
-                            console.error('Sign-in failed: ', error);
-                            alert('Sign-in failed! Please try again.');
-                        });
-                    });
-                }).catch(function(error) {
-                    console.error('OAuth initialization failed: ', error);
-                    alert('OAuth initialization failed! Please try again.');
-                });
-            });
-        }
-
-        // Update user status after sign-in
-        function updateSigninStatus(isSignedIn) {
-            if (isSignedIn) {
-                const profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
-                console.log('Signed in as: ' + profile.getName());
-                userAuthenticated = true;
-                document.getElementById('authButton').style.display = 'none';
-                document.getElementById('failureLogForm').style.display = 'block';
-            } else {
-                userAuthenticated = false;
-                document.getElementById('authButton').style.display = 'block';
-                document.getElementById('failureLogForm').style.display = 'none';
-            }
-        }
-
-        // Form submission
+        // Form submission to send data to Google Apps Script or any backend
         const form = document.getElementById('failureLogForm');
         form.addEventListener('submit', function(e) {
             e.preventDefault(); // Prevent the default form submission
 
-            if (!userAuthenticated) {
-                alert('Please sign in first!');
-                return;
-            }
-
-            // Gather form data
             const formData = {
                 failureDescription: document.getElementById('failureDescription').value,
                 machine: document.getElementById('machine').value,
@@ -184,8 +174,8 @@
                 solution: document.getElementById('solution').value,
             };
 
-            // Send the data to Google Apps Script
-            fetch('https://script.google.com/macros/s/AKfycbwgOvb-5aiPHc1roJvugkpVTilpJwZRKnGoAyqiOFDRKKW-LQC5ebRg567N2Cdmg92OSQ/exec', {
+            // Send the data to your backend or Google Sheets
+            fetch('YOUR_GOOGLE_SCRIPT_URL', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -200,18 +190,8 @@
             .catch(error => {
                 console.error('Error:', error);
                 alert('There was an error submitting the log.');
-                alert('There was an error submitting the log. Please try again.');
             });
         });
-
-        // Load the Google API client
-        (function(d, s, id) {
-            var js, fjs = d.getElementsByTagName(s)[0];
-            if (d.getElementById(id)) return;
-            js = d.createElement(s); js.id = id;
-            js.src = "https://apis.google.com/js/platform.js?onload=handleClientLoad";
-            fjs.parentNode.insertBefore(js, fjs);
-        }(document, 'script', 'google-jssdk'));
     </script>
 </body>
 </html>
