@@ -34,61 +34,184 @@
             padding: 20px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        h1 {
+            color: #333;
+        }
+
+        label {
+            font-weight: bold;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn-submit {
+            background-color: #ff5c5c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-submit:hover {
+            background-color: #e04b4b;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        .footer p {
+            margin: 0;
+        }
+
+        .date-time {
+            font-size: 14px;
+            color: #888;
+            margin-top: 10px;
+        }
     </style>
-
-    <!-- Firebase SDK -->
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDJHwwzpwDKZvf4wG8FS7bKg7WuG2eg6wY",
-            authDomain: "velocity-failure-log-eb1f9.firebaseapp.com",
-            projectId: "velocity-failure-log-eb1f9",
-            storageBucket: "velocity-failure-log-eb1f9.firebasestorage.app",
-            messagingSenderId: "885918623112",
-            appId: "1:885918623112:web:f88d80bef49d6a2b98c63d",
-            measurementId: "G-BY9X686BQR"
-        };
-
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app);
-
-        // Function to send failure log to Firestore
-        const submitFailureLog = async (logData) => {
-            try {
-                const docRef = await addDoc(collection(db, "failureLogs"), {
-                    ...logData,
-                    timestamp: new Date(),
-                });
-                console.log("Document written with ID: ", docRef.id);
-            } catch (e) {
-                console.error("Error adding document: ", e);
-            }
-        };
-
-        // Example usage: submit a failure log
-        submitFailureLog({
-            errorMessage: "Motor failure",
-            severity: "high",
-        });
-    </script>
 </head>
-
 <body>
     <header>
-        <img src="your-logo.png" alt="Velocity Logo">
-        <h1>Welcome to Velocity | Sim Racing Lounge</h1>
+        <img src="https://assets.onecompiler.app/434hq657m/434hq8r7a/Screenshot%202024-12-29%20184316.png" alt="Velocity Logo">
     </header>
 
     <div class="container">
-        <h2>Failure Log</h2>
-        <p>Track issues here...</p>
+        <h2>Submit a Failure Log</h2>
+        <button id="authButton">Sign in with Google</button>
+
+        <form id="failureLogForm" style="display:none;">
+            <label for="failureDescription">Failure Description:</label>
+            <textarea id="failureDescription" name="failureDescription" rows="4" required></textarea>
+
+            <label for="machine">Machine Name:</label>
+            <input type="text" id="machine" name="machine" required>
+
+            <label for="employee">Employee Name:</label>
+            <input type="text" id="employee" name="employee" required>
+
+            <label for="solution">Solution:</label>
+            <textarea id="solution" name="solution" rows="4" placeholder="Enter the solution to the failure" required></textarea>
+
+            <button type="submit" class="btn-submit">Submit Log</button>
+        </form>
+
+        <div class="date-time">
+            <p>Current Date and Time: <span id="currentDateTime"></span></p>
+        </div>
     </div>
+
+    <div class="footer">
+        <p>&copy; 2024 Velocity | Sim Racing Lounge. All rights reserved.</p>
+    </div>
+
+    <script>
+        let userAuthenticated = false;
+
+        // Display current date and time
+        function updateDateTime() {
+            const currentDateTime = new Date().toLocaleString();
+            document.getElementById('currentDateTime').textContent = currentDateTime;
+        }
+
+        setInterval(updateDateTime, 1000);
+        updateDateTime();  // Run immediately to display time on load
+
+        // Google OAuth initialization and client load
+        function handleClientLoad() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init({
+                    client_id: '470392691930-pnc6fop5etff3ko68adqh2cg5vmi7647.apps.googleusercontent.com' // Replace with your actual client ID
+                }).then(function() {
+                    const auth2 = gapi.auth2.getAuthInstance();
+                    auth2.isSignedIn.listen(updateSigninStatus);
+                    document.getElementById('authButton').addEventListener('click', function() {
+                        auth2.signIn();
+                        auth2.signIn().catch(function(error) {
+                            console.error('Sign-in failed: ', error);
+                            alert('Sign-in failed! Please try again.');
+                        });
+                    });
+                }).catch(function(error) {
+                    console.error('OAuth initialization failed: ', error);
+                    alert('OAuth initialization failed! Please try again.');
+                });
+            });
+        }
+
+        // Update user status after sign-in
+        function updateSigninStatus(isSignedIn) {
+            if (isSignedIn) {
+                const profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+                console.log('Signed in as: ' + profile.getName());
+                userAuthenticated = true;
+                document.getElementById('authButton').style.display = 'none';
+                document.getElementById('failureLogForm').style.display = 'block';
+            } else {
+                userAuthenticated = false;
+                document.getElementById('authButton').style.display = 'block';
+                document.getElementById('failureLogForm').style.display = 'none';
+            }
+        }
+
+        // Form submission
+        const form = document.getElementById('failureLogForm');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent the default form submission
+
+            if (!userAuthenticated) {
+                alert('Please sign in first!');
+                return;
+            }
+
+            // Gather form data
+            const formData = {
+                failureDescription: document.getElementById('failureDescription').value,
+                machine: document.getElementById('machine').value,
+                employee: document.getElementById('employee').value,
+                solution: document.getElementById('solution').value,
+            };
+
+            // Send the data to Google Apps Script
+            fetch('https://script.google.com/macros/s/AKfycbwgOvb-5aiPHc1roJvugkpVTilpJwZRKnGoAyqiOFDRKKW-LQC5ebRg567N2Cdmg92OSQ/exec', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                console.log('Success:', data);
+                alert('Log submitted successfully!');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error submitting the log.');
+                alert('There was an error submitting the log. Please try again.');
+            });
+        });
+
+        // Load the Google API client
+        (function(d, s, id) {
+            var js, fjs = d.getElementsByTagName(s)[0];
+            if (d.getElementById(id)) return;
+            js = d.createElement(s); js.id = id;
+            js.src = "https://apis.google.com/js/platform.js?onload=handleClientLoad";
+            fjs.parentNode.insertBefore(js, fjs);
+        }(document, 'script', 'google-jssdk'));
+    </script>
 </body>
 </html>
